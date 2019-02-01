@@ -35,6 +35,7 @@
 #include <QPainter>
 #include <QStandardPaths>
 #include <QTimer>
+#include <QToolBar>
 
 FileDiffWidget::DrawData::DrawData()
 {
@@ -157,6 +158,7 @@ MainWindow::MainWindow(QWidget *parent)
 		settings.beginGroup("MainWindow");
 		bool maximized = settings.value("Maximized").toBool();
 		restoreGeometry(settings.value("Geometry").toByteArray());
+        restoreState(settings.value("WindowState").toByteArray());
 //		ui->splitter->restoreState(settings.value("SplitterState").toByteArray());
 		settings.endGroup();
 		if (maximized) {
@@ -166,8 +168,33 @@ MainWindow::MainWindow(QWidget *parent)
 	}
 
 	setTabOrder(ui->treeWidget_repos, ui->widget_log);
-//	setTabOrder(ui->widget_log, ui->treeWidget_repos);
-
+//	setTabOrder(ui->widget_log, ui->treeWidget_repos)
+    //tmp code
+    //hide the custom toolbar & move the buttons to a standard toolbar
+    ui->frame_4->setVisible(false);
+    QToolBar *pMainToolbar = new QToolBar;
+    pMainToolbar->addWidget(ui->toolButton_clone);
+    pMainToolbar->addWidget(ui->toolButton_fetch);
+    pMainToolbar->addWidget(ui->toolButton_pull);
+    pMainToolbar->addWidget(ui->toolButton_push);
+    pMainToolbar->addSeparator();
+    pMainToolbar->addWidget(ui->toolButton_terminal);
+    pMainToolbar->addWidget(ui->toolButton_explorer);
+    pMainToolbar->addSeparator();
+    pMainToolbar->addWidget(ui->frame_3);
+    pMainToolbar->addSeparator();
+    //pMainToolbar->addWidget(ui->verticalLayout_10);
+    this->addToolBar(Qt::TopToolBarArea, pMainToolbar);
+    //add menu
+    QMenuBar *mainMenu = ui->menuBar;
+    QMenu *docksMenu = new QMenu(tr("Window"));
+    docksMenu->addAction(ui->dockWidget_diff->toggleViewAction());
+    docksMenu->addAction(ui->dockWidget_table->toggleViewAction());
+    docksMenu->addAction(ui->dockWidget_treeRepos->toggleViewAction());
+    docksMenu->addAction(ui->dockWidget_log->toggleViewAction());
+    docksMenu->addAction(ui->dockWidget_stacked->toggleViewAction());
+    mainMenu->addMenu(docksMenu);
+    //end tmp code
 	startTimers();
 }
 
@@ -409,6 +436,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 			settings.beginGroup("MainWindow");
 			settings.setValue("Maximized", maximized);
 			settings.setValue("Geometry", saveGeometry());
+            settings.setValue("WindowState", saveState()); //saves docks & toolbars
 			//		settings.setValue("SplitterState", ui->splitter->saveState());
 			settings.endGroup();
 		}

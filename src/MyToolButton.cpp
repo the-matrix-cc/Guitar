@@ -34,7 +34,9 @@ void MyToolButton::paintEvent(QPaintEvent *event)
 	QToolButton::paintEvent(event);
 
 	auto *mw = qobject_cast<MainWindow *>(window());
-	Q_ASSERT(mw);
+    if(!mw) return;
+    //Q_ASSERT(mw); //TMP to move the toolbar
+
 
 	if (indicator == Dot && number > 0) {
 		QPainter pr(this);
